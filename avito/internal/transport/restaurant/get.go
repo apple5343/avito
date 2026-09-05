@@ -1,10 +1,12 @@
 package restaurant
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"avito/internal/model"
+	"avito/pkg/errorx"
 
 	"github.com/labstack/echo/v4"
 )
@@ -13,7 +15,7 @@ func (h *Handler) GetByID() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
-			return err
+			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid id: %w", err))
 		}
 		restaurant, err := h.service.GetByID(c.Request().Context(), id)
 		if err != nil {

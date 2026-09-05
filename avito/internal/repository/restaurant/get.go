@@ -12,7 +12,7 @@ import (
 )
 
 func (r *Restaurant) GetByAPIKey(ctx context.Context, apiKey string) (*model.Restaurant, error) {
-	query := `SELECT id, name, description, city, cuisine, callback_url, api_key, created_at, updated_at FROM restaurants WHERE api_key = $1`
+	query := `SELECT id, name, description, city, cuisine, callback_url, api_key, is_active, created_at, updated_at FROM restaurants WHERE api_key = $1`
 	var restaurant model.Restaurant
 	if err := r.db.GetContext(ctx, &restaurant, query, apiKey); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -24,7 +24,7 @@ func (r *Restaurant) GetByAPIKey(ctx context.Context, apiKey string) (*model.Res
 }
 
 func (r *Restaurant) GetByID(ctx context.Context, id int) (*model.Restaurant, error) {
-	query := `SELECT id, name, description, city, cuisine, callback_url, api_key, created_at, updated_at FROM restaurants WHERE id = $1`
+	query := `SELECT id, name, description, city, cuisine, callback_url, api_key, is_active, created_at, updated_at FROM restaurants WHERE id = $1`
 	var restaurant model.Restaurant
 	if err := r.db.GetContext(ctx, &restaurant, query, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

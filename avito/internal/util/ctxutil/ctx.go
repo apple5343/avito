@@ -6,6 +6,7 @@ type ContextKey string
 
 var (
 	apiKeyCtxKey ContextKey = "api_key"
+	userIDCtxKey ContextKey = "user_id"
 )
 
 func ContextWithAPIKey(ctx context.Context, key string) context.Context {
@@ -18,4 +19,16 @@ func APIKeyFromContext(ctx context.Context) string {
 		return ""
 	}
 	return key
+}
+
+func ContextWithUserID(ctx context.Context, userID int) context.Context {
+	return context.WithValue(ctx, userIDCtxKey, userID)
+}
+
+func UserIDFromContext(ctx context.Context) int {
+	userID, ok := ctx.Value(userIDCtxKey).(int)
+	if !ok {
+		return 0
+	}
+	return userID
 }

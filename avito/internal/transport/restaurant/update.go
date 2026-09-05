@@ -17,6 +17,7 @@ func (h *Handler) Update() echo.HandlerFunc {
 		"city":         true,
 		"cuisine":      true,
 		"callback_url": true,
+		"is_active":    true,
 	}
 	return func(c echo.Context) error {
 		var updates map[string]any
