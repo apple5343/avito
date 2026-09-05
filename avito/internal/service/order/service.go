@@ -11,6 +11,7 @@ type orderRepository interface {
 	GetItemsByOrderID(ctx context.Context, orderID int) ([]model.OrderItem, error)
 	GetUserOrders(ctx context.Context, userID int) ([]model.Order, error)
 	Create(ctx context.Context, order *model.Order, items []model.OrderItem) error
+	UpdateStatus(ctx context.Context, id int, status string) (*model.Order, error)
 }
 
 type menuService interface {
@@ -18,6 +19,7 @@ type menuService interface {
 }
 
 type restaurantService interface {
+	GetByAPIKey(ctx context.Context, apiKey string) (*model.Restaurant, error)
 	GetByID(ctx context.Context, id int) (*model.Restaurant, error)
 }
 

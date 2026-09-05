@@ -9,6 +9,16 @@ import (
 	"github.com/shopspring/decimal"
 )
 
+const (
+	StatusConfirmed  = "confirmed"
+	StatusRejected   = "rejected"
+	StatusCooking    = "cooking"
+	StatusReady      = "ready"
+	StatusDelivering = "delivering"
+	StatusDelivered  = "delivered"
+	StatusCancelled  = "cancelled"
+)
+
 var Statuses = map[string]bool{
 	"confirmed":  true,
 	"rejected":   true,

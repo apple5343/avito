@@ -52,6 +52,7 @@ func (s *Server) route() {
 	{
 		order.GET("", middleware.UserIDMiddleware()(s.orderHandler.GetUserOrders()))
 		order.GET("/:id", middleware.UserIDMiddleware()(s.orderHandler.GetUserOrder()))
+		order.PATCH("/:id/status", middleware.APIKeyMiddleware()(s.orderHandler.UpdateStatus()))
 		order.POST("", middleware.UserIDMiddleware()(s.orderHandler.Create()))
 	}
 }

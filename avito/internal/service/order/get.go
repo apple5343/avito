@@ -44,7 +44,7 @@ func (s *Order) GetUserOrder(ctx context.Context, orderID int) (*model.Order, []
 	}
 	items, err := s.repo.GetItemsByOrderID(ctx, orderID)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("get items by order id: %w", err))
 	}
 	return order, items, nil
 }
