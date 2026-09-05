@@ -32,5 +32,6 @@ func (s *Server) route() {
 	restaurant := s.e.Group("/restaurants")
 	{
 		restaurant.POST("", s.restaurantHandler.Create())
+		restaurant.PATCH("", middleware.ApiKeyMiddleware()(s.restaurantHandler.Update()))
 	}
 }

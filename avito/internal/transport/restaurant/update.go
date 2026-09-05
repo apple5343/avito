@@ -27,5 +27,12 @@ func (h *Handler) Update() echo.HandlerFunc {
 				return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid field: %s", field))
 			}
 		}
+
+		restaurant, err := h.service.Update(c.Request().Context(), updates)
+
+		if err != nil {
+			return err
+		}
+		return c.JSON(200, restaurant)
 	}
 }

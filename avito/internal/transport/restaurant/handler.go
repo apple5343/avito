@@ -7,7 +7,7 @@ import (
 
 type RestaurantService interface {
 	Create(ctx context.Context, restaurant *model.Restaurant) error
-	Update(ctx context.Context, updates map[string]interface{}) error
+	Update(ctx context.Context, updates map[string]interface{}) (*model.Restaurant, error)
 }
 
 type Handler struct {

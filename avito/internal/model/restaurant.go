@@ -3,8 +3,8 @@ package model
 import (
 	"avito/internal/util/keyutil"
 	"avito/pkg/errorx"
+	"avito/pkg/validator"
 	"fmt"
-	"net/url"
 	"time"
 )
 
@@ -44,8 +44,7 @@ func (r *Restaurant) BeforeCreate() error {
 	if !cuisines[r.Cuisine] {
 		return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid cuisine type"))
 	}
-	u, err := url.Parse(r.CallbackURL)
-	if err != nil || u.Scheme == "" || u.Host == "" {
+	if isValid := validator.ValidateURL(r.CallbackURL); !isValid {
 		return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid callback url"))
 	}
 
