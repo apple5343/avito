@@ -26,8 +26,8 @@ type Restaurant struct {
 	Description string    `json:"description"  db:"description"`
 	City        string    `json:"city"         db:"city"`
 	Cuisine     string    `json:"cuisine"      db:"cuisine"`
-	CallbackURL string    `json:"callback_url" db:"callback_url"`
-	APIKey      string    `json:"api_key"      db:"api_key"`
+	CallbackURL string    `json:"callback_url,omitempty" db:"callback_url"`
+	APIKey      string    `json:"api_key,omitempty"      db:"api_key"`
 	IsActive    bool      `json:"is_active"    db:"is_active"`
 	CreatedAt   time.Time `json:"created_at"   db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"   db:"updated_at"`
@@ -57,4 +57,11 @@ func (r *Restaurant) BeforeCreate() error {
 
 	r.APIKey = apiKey
 	return nil
+}
+
+type RestaurantFilter struct {
+	Name     *string
+	City     *string
+	Cuisine  *string
+	IsActive *bool
 }
