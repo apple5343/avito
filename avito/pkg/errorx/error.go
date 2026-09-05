@@ -6,6 +6,7 @@ const (
 	CodeNotFound            = 404
 	CodeConflict            = 409
 	CodeUnauthorized        = 401
+	CodeForbidden           = 403
 )
 
 type Error struct {

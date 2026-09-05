@@ -3,7 +3,9 @@ package main
 import (
 	"avito/internal/config"
 	"avito/internal/infrastructure"
+	menuRepository "avito/internal/repository/menu"
 	restaurantRepository "avito/internal/repository/restaurant"
+	menuService "avito/internal/service/menu"
 	restaurantService "avito/internal/service/restaurant"
 	"avito/internal/transport"
 )
@@ -25,9 +27,12 @@ func main() {
 	}
 
 	restaurantRepo := restaurantRepository.NewRepository(db)
-	restaurantService := restaurantService.NewService(restaurantRepo)
+	menuRepo := menuRepository.NewRepository(db)
 
-	server := transport.NewServer(serverConfig, restaurantService)
+	restaurantService := restaurantService.NewService(restaurantRepo)
+	menuService := menuService.NewService(menuRepo, restaurantService)
+
+	server := transport.NewServer(serverConfig, restaurantService, menuService)
 	err = server.Start()
 	if err != nil {
 		panic(err)

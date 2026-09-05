@@ -2,6 +2,7 @@ package transport
 
 import (
 	"avito/internal/config"
+	"avito/internal/transport/menu"
 	"avito/internal/transport/middleware"
 	"avito/internal/transport/restaurant"
 
@@ -11,13 +12,15 @@ import (
 type Server struct {
 	e                 *echo.Echo
 	restaurantHandler *restaurant.Handler
+	menuHandler       *menu.Handler
 	cfg               *config.Server
 }
 
-func NewServer(cfg *config.Server, restaurantService restaurant.Service) *Server {
+func NewServer(cfg *config.Server, restaurantService restaurant.Service, menuService menu.Service) *Server {
 	return &Server{
 		e:                 echo.New(),
 		restaurantHandler: restaurant.NewHandler(restaurantService),
+		menuHandler:       menu.NewHandler(menuService),
 		cfg:               cfg,
 	}
 }
@@ -33,5 +36,10 @@ func (s *Server) route() {
 	{
 		restaurant.POST("", s.restaurantHandler.Create())
 		restaurant.PATCH("", middleware.APIKeyMiddleware()(s.restaurantHandler.Update()))
+	}
+	menu := s.e.Group("/menu")
+	{
+		menu.POST("", middleware.APIKeyMiddleware()(s.menuHandler.Create()))
+		menu.PATCH("/:id", middleware.APIKeyMiddleware()(s.menuHandler.Update()))
 	}
 }

@@ -1,0 +1,40 @@
+package menu
+
+import (
+	"context"
+	"fmt"
+	"strings"
+	"time"
+
+	"avito/internal/model"
+	repoErrors "avito/internal/repository/errors"
+)
+
+func (r *Menu) Update(ctx context.Context, id int, updates map[string]any) (*model.MenuItem, error) {
+	setClauses := make([]string, 0, len(updates)+1)
+	args := make([]any, 0, len(updates)+2)
+
+	for field, value := range updates {
+		args = append(args, value)
+		setClauses = append(setClauses, fmt.Sprintf("%s = $%d", field, len(args)))
+	}
+
+	args = append(args, time.Now())
+	setClauses = append(setClauses, fmt.Sprintf("updated_at = $%d", len(args)))
+
+	args = append(args, id)
+	query := fmt.Sprintf("UPDATE menu_items SET %s WHERE id = $%d", strings.Join(setClauses, ", "), len(args))
+	res, err := r.db.ExecContext(ctx, query, args...)
+
+	if err != nil {
+		return nil, err
+	}
+	count, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+	if count == 0 {
+		return nil, repoErrors.ErrNotFound
+	}
+	return r.GetItemByID(ctx, id)
+}
