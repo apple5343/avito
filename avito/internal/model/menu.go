@@ -33,3 +33,8 @@ func (m *MenuItem) BeforeCreate() error {
 	}
 	return nil
 }
+
+type MenuFilter struct {
+	Category    *string
+	IsAvailable *bool
+}

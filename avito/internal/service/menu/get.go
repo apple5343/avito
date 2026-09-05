@@ -21,3 +21,16 @@ func (s *Menu) GetItemByID(ctx context.Context, id int) (*model.MenuItem, error)
 
 	return item, nil
 }
+
+func (s *Menu) GetMenu(ctx context.Context, restaurantID int, filter *model.MenuFilter) ([]model.MenuItem, error) {
+	if filter.IsAvailable == nil {
+		available := true
+		filter.IsAvailable = &available
+	}
+	items, err := s.repo.GetMenu(ctx, restaurantID, filter)
+	if err != nil {
+		return nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("get menu: %w", err))
+	}
+
+	return items, nil
+}
