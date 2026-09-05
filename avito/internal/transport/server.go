@@ -14,7 +14,7 @@ type Server struct {
 	cfg               *config.Server
 }
 
-func NewServer(cfg *config.Server, restaurantService restaurant.RestaurantService) *Server {
+func NewServer(cfg *config.Server, restaurantService restaurant.Service) *Server {
 	return &Server{
 		e:                 echo.New(),
 		restaurantHandler: restaurant.NewHandler(restaurantService),
@@ -32,6 +32,6 @@ func (s *Server) route() {
 	restaurant := s.e.Group("/restaurants")
 	{
 		restaurant.POST("", s.restaurantHandler.Create())
-		restaurant.PATCH("", middleware.ApiKeyMiddleware()(s.restaurantHandler.Update()))
+		restaurant.PATCH("", middleware.APIKeyMiddleware()(s.restaurantHandler.Update()))
 	}
 }

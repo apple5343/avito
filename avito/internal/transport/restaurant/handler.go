@@ -1,20 +1,21 @@
 package restaurant
 
 import (
-	"avito/internal/model"
 	"context"
+
+	"avito/internal/model"
 )
 
-type RestaurantService interface {
+type Service interface {
 	Create(ctx context.Context, restaurant *model.Restaurant) error
-	Update(ctx context.Context, updates map[string]interface{}) (*model.Restaurant, error)
+	Update(ctx context.Context, updates map[string]any) (*model.Restaurant, error)
 }
 
 type Handler struct {
-	service RestaurantService
+	service Service
 }
 
-func NewHandler(service RestaurantService) *Handler {
+func NewHandler(service Service) *Handler {
 	return &Handler{
 		service: service,
 	}

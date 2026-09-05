@@ -1,8 +1,9 @@
 package restaurant
 
 import (
-	"avito/internal/model"
 	"context"
+
+	"avito/internal/model"
 )
 
 func (r *Restaurant) Create(ctx context.Context, restaurant *model.Restaurant) error {
@@ -14,6 +15,9 @@ func (r *Restaurant) Create(ctx context.Context, restaurant *model.Restaurant) e
 	rows, err := r.db.NamedQueryContext(ctx, query, restaurant)
 	if err != nil {
 		return err
+	}
+	if rows.Err() != nil {
+		return rows.Err()
 	}
 	defer rows.Close()
 

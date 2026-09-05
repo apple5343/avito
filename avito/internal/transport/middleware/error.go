@@ -1,21 +1,26 @@
 package middleware
 
 import (
-	"avito/pkg/errorx"
 	"errors"
-	"fmt"
+	"log"
+	"net/http"
+
+	"avito/pkg/errorx"
 
 	"github.com/labstack/echo/v4"
 )
 
 func ErrorMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		const statusField = "status"
+		const messageField = "message"
+		const errorStandard = "error"
 		return func(c echo.Context) error {
 			err := next(c)
 			if nil == err {
 				return nil
 			}
-			fmt.Println(err.Error())
+			log.Println(err.Error())
 			if c.Response().Committed {
 				return err
 			}
@@ -23,33 +28,35 @@ func ErrorMiddleware() echo.MiddlewareFunc {
 			httpErr := &echo.HTTPError{}
 			if errors.As(err, &httpErr) {
 				return c.JSON(httpErr.Code, map[string]string{
-					"status":  "error",
-					"message": httpErr.Error(),
+					statusField:  errorStandard,
+					messageField: httpErr.Error(),
 				})
 			}
 
-			if commonErr, ok := err.(*errorx.Error); ok && commonErr != nil {
+			commonErr := &errorx.Error{}
+			if errors.As(err, &commonErr) {
 				if isInternalError(commonErr) {
 					return c.JSON(commonErr.Code, map[string]string{
-						"status":  "error",
-						"message": "internal server error",
+						statusField:  errorStandard,
+						messageField: "internal server error",
 					})
 				}
 
 				return c.JSON(commonErr.Code, map[string]string{
-					"status":  "error",
-					"message": commonErr.Error(),
+					statusField:  errorStandard,
+					messageField: commonErr.Error(),
 				})
 			}
 
-			return c.JSON(500, map[string]string{
-				"status":  "error",
-				"message": "internal server error",
+			return c.JSON(http.StatusInternalServerError, map[string]string{
+				statusField:  errorStandard,
+				messageField: "internal server error",
 			})
 		}
 	}
 }
 
 func isInternalError(err *errorx.Error) bool {
-	return err.Code/100 == 5
+	const internalErrorPrefix = 5
+	return err.Code/100 == internalErrorPrefix
 }

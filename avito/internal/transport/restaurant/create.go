@@ -1,6 +1,8 @@
 package restaurant
 
 import (
+	"net/http"
+
 	"avito/internal/model"
 
 	"github.com/labstack/echo/v4"
@@ -16,6 +18,6 @@ func (h *Handler) Create() echo.HandlerFunc {
 			return err
 		}
 
-		return c.JSON(201, restaurant)
+		return c.JSON(http.StatusCreated, restaurant)
 	}
 }

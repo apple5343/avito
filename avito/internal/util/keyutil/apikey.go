@@ -7,7 +7,8 @@ import (
 )
 
 func GenerateAPIKey() (string, error) {
-	bytes := make([]byte, 32)
+	const apiKeyLength = 32
+	bytes := make([]byte, apiKeyLength)
 	if _, err := rand.Read(bytes); err != nil {
 		return "", fmt.Errorf("failed to generate API key: %w", err)
 	}

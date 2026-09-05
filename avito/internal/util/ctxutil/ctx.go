@@ -2,16 +2,18 @@ package ctxutil
 
 import "context"
 
+type ContextKey string
+
 var (
-	ApiKeyCtxKey = "api_key"
+	apiKeyCtxKey ContextKey = "api_key"
 )
 
-func ContextWithApiKey(ctx context.Context, key string) context.Context {
-	return context.WithValue(ctx, ApiKeyCtxKey, key)
+func ContextWithAPIKey(ctx context.Context, key string) context.Context {
+	return context.WithValue(ctx, apiKeyCtxKey, key)
 }
 
-func ApiKeyFromContext(ctx context.Context) string {
-	key, ok := ctx.Value(ApiKeyCtxKey).(string)
+func APIKeyFromContext(ctx context.Context) string {
+	key, ok := ctx.Value(apiKeyCtxKey).(string)
 	if !ok {
 		return ""
 	}

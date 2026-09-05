@@ -1,10 +1,11 @@
 package restaurant
 
 import (
-	"avito/internal/model"
-	"avito/pkg/errorx"
 	"context"
 	"fmt"
+
+	"avito/internal/model"
+	"avito/pkg/errorx"
 )
 
 func (s *Restaurant) Create(ctx context.Context, restaurant *model.Restaurant) error {

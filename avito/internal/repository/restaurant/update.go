@@ -1,17 +1,18 @@
 package restaurant
 
 import (
-	"avito/internal/model"
-	repoErrors "avito/internal/repository/errors"
 	"context"
 	"fmt"
 	"strings"
 	"time"
+
+	"avito/internal/model"
+	repoErrors "avito/internal/repository/errors"
 )
 
-func (r *Restaurant) Update(ctx context.Context, apiKey string, updates map[string]interface{}) (*model.Restaurant, error) {
-	setClauses := make([]string, 0, len(updates))
-	args := []interface{}{}
+func (r *Restaurant) Update(ctx context.Context, apiKey string, updates map[string]any) (*model.Restaurant, error) {
+	setClauses := make([]string, 0, len(updates)+1)
+	args := make([]any, 0, len(updates)+2)
 
 	for field, value := range updates {
 		args = append(args, value)
@@ -35,5 +36,5 @@ func (r *Restaurant) Update(ctx context.Context, apiKey string, updates map[stri
 	if count == 0 {
 		return nil, repoErrors.ErrNotFound
 	}
-	return r.GetByApiKey(ctx, apiKey)
+	return r.GetByAPIKey(ctx, apiKey)
 }

@@ -28,7 +28,8 @@ func main() {
 	restaurantService := restaurantService.NewService(restaurantRepo)
 
 	server := transport.NewServer(serverConfig, restaurantService)
-	if err := server.Start(); err != nil {
+	err = server.Start()
+	if err != nil {
 		panic(err)
 	}
 }

@@ -1,9 +1,11 @@
 package restaurant
 
 import (
-	"avito/pkg/errorx"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"avito/pkg/errorx"
 
 	"github.com/labstack/echo/v4"
 )
@@ -17,7 +19,7 @@ func (h *Handler) Update() echo.HandlerFunc {
 		"callback_url": true,
 	}
 	return func(c echo.Context) error {
-		var updates map[string]interface{}
+		var updates map[string]any
 		if err := json.NewDecoder(c.Request().Body).Decode(&updates); err != nil {
 			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid json: %w", err))
 		}
@@ -33,6 +35,6 @@ func (h *Handler) Update() echo.HandlerFunc {
 		if err != nil {
 			return err
 		}
-		return c.JSON(200, restaurant)
+		return c.JSON(http.StatusOK, restaurant)
 	}
 }
