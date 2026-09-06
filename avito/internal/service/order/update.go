@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"avito/internal/model"
 	"avito/internal/util/ctxutil"
@@ -37,5 +38,6 @@ func (s *Order) UpdateStatus(ctx context.Context, orderID int, status, message s
 	if err != nil {
 		return nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
 	}
+	log.Printf("order %d status updated to %s", orderID, status)
 	return order, nil
 }

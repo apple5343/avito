@@ -56,8 +56,10 @@ func EnsureRegistered(avitoURL string, restaurant Restaurant) (string, error) {
 		return "", fmt.Errorf("failed to save API key: %w", err)
 	}
 
+	log.Printf("API key: %s", apiKey)
 	log.Printf("Restaurant registered, API key saved to %s", apiKeyFile)
 	log.Printf("Add menu items...")
+	log.Panicln("Menu added")
 	addMenuItems(avitoURL, apiKey, model.MenuItems)
 	return apiKey, nil
 }

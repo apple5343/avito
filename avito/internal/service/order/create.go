@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 
 	"avito/internal/model"
 	"avito/internal/util/ctxutil"
@@ -98,6 +99,6 @@ func (s *Order) Create(ctx context.Context, req *model.OrderRequest) (*model.Ord
 		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
 	}
 	order.Status = model.StatusConfirmed
-
+	log.Printf("order created: %v", order)
 	return order, items, nil
 }
