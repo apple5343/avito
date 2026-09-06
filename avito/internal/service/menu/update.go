@@ -3,7 +3,6 @@ package menu
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"avito/internal/model"
 	"avito/internal/util/ctxutil"
@@ -28,8 +27,6 @@ func (s *Menu) Update(ctx context.Context, id int, updates map[string]any) (*mod
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(restaurant)
-	fmt.Println(menuItem)
 	if restaurant.ID != menuItem.RestaurantID {
 		return nil, errorx.New(errorx.CodeForbidden, errors.New("forbidden"))
 	}
@@ -54,7 +51,6 @@ func (s *Menu) Update(ctx context.Context, id int, updates map[string]any) (*mod
 			return nil, errorx.New(errorx.CodeBadRequest, errors.New("category is required"))
 		}
 	}
-
 	menuItem, err = s.repo.Update(ctx, menuItem.ID, updates)
 	if err != nil {
 		return nil, err

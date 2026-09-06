@@ -72,5 +72,5 @@ func (c *Client) Create(ctx context.Context, url string, order *model.Order, ite
 		return false, res.Message, nil
 	}
 
-	return false, "r	estaurant returned unexpected status", nil
+	return false, "restaurant returned unexpected status", nil
 }

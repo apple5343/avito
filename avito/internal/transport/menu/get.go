@@ -1,10 +1,12 @@
 package menu
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"avito/internal/model"
+	"avito/pkg/errorx"
 
 	"github.com/labstack/echo/v4"
 )
@@ -35,6 +37,8 @@ func (h *Handler) GetMenu() echo.HandlerFunc {
 		}
 		if isAvailable, err := strconv.ParseBool(c.QueryParam("is_available")); err == nil {
 			filter.IsAvailable = &isAvailable
+		} else if c.QueryParam("is_available") != "" {
+			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid is_available: %w", err))
 		}
 		menuItems, err := h.service.GetMenu(c.Request().Context(), restaurantID, filter)
 		if err != nil {

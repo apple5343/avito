@@ -41,6 +41,8 @@ func (h *Handler) List() echo.HandlerFunc {
 		}
 		if isActive, err := strconv.ParseBool(c.QueryParam("is_active")); err == nil {
 			filter.IsActive = &isActive
+		} else if c.QueryParam("is_active") != "" {
+			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid is_active: %w", err))
 		}
 		restaurants, err := h.service.List(c.Request().Context(), filter)
 		if err != nil {
