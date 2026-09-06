@@ -10,5 +10,74 @@ services:
       - "${POSTGRES_PORT}:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
-      interval: 30s
-      timeout: 20s
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avito-network
+
+  avito-migrate:
+    build:
+      context: ./avito
+      target: migrate
+    container_name: avito-migrate
+    environment:
+      POSTGRES_DSN: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@avito-postgres:5432/${POSTGRES_DB}?sslmode=disable
+    depends_on:
+      avito-postgres:
+        condition: service_healthy
+    networks:
+      - avito-network
+
+
+  avito:
+    build:
+      context: ./avito
+      target: main
+    container_name: avito
+    environment:
+      POSTGRES_DSN: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@avito-postgres:5432/${POSTGRES_DB}?sslmode=disable
+      SERVER_ADDR: 0.0.0.0:${AVITO_PORT:-8080}
+    ports:
+      - "${AVITO_PORT:-8080}:${AVITO_PORT:-8080}"
+    depends_on:
+      avito-postgres:
+        condition: service_healthy
+      avito-migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${AVITO_PORT:-8080}/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avito-network
+
+  deliciousfood:
+    build:
+      context: ./deliciousfood
+    container_name: deliciousfood
+    environment:
+      DELICIOUSFOOD_ADDR: 0.0.0.0:${DELICIOUSFOOD_PORT:-8081}
+      AVITO_URL: http://avito:${AVITO_PORT:-8080}
+      RESTAURANT_NAME: Delicious Food
+      RESTAURANT_CITY: Казань
+      RESTAURANT_CUISINE: american
+      RESTAURANT_CALLBACK_URL: http://deliciousfood:${DELICIOUSFOOD_PORT:-8081}/orders
+    ports:
+      - "${DELICIOUSFOOD_PORT:-8081}:${DELICIOUSFOOD_PORT:-8081}"
+    depends_on:
+      avito:
+        condition: service_healthy
+    volumes:
+      - api-keys:/data
+    working_dir: /data
+    networks:
+      - avito-network
+
+volumes:
+  api-keys:
+
+networks:
+  avito-network:
+    driver: bridge

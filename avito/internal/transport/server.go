@@ -6,6 +6,9 @@ import (
 	"avito/internal/transport/middleware"
 	"avito/internal/transport/order"
 	"avito/internal/transport/restaurant"
+	"net/http"
+
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,7 +37,15 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) route() {
+	s.e.Use(echoMiddleware.Recover())
 	s.e.Use(middleware.ErrorMiddleware())
+	s.e.GET("/health", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, map[string]string{
+			"status": "ok",
+		})
+
+	})
+
 	restaurant := s.e.Group("/restaurants")
 	{
 		restaurant.GET("", s.restaurantHandler.List())
