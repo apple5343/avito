@@ -55,33 +55,37 @@ func (s *Server) OrderHandler() echo.HandlerFunc {
 }
 
 func (s *Server) processOrder(orderID int, avitoURL, apiKey string) {
-	statusFlow := []string{
-		"cooking",
-		"ready",
-		"delivering",
-		"delivered",
+	statusFlow := []struct {
+		status  string
+		message string
+	}{
+		{"cooking", "Ваш заказ готовится"},
+		{"ready", "Заказ готов, ожидает курьера"},
+		{"delivering", "Курьер выехал к вам"},
+		{"delivered", "Заказ доставлен. Приятного аппетита!"},
 	}
 
-	for _, status := range statusFlow {
+	for _, step := range statusFlow {
 		sleepDuration := time.Second * time.Duration(rand.IntN(20)+10)
-		log.Printf("Order %d: waiting %v before status '%s'", orderID, sleepDuration, status)
+		log.Printf("Order %d: waiting %v before status '%s'", orderID, sleepDuration, step.status)
 		time.Sleep(sleepDuration)
 
-		if err := s.sendStatusUpdate(orderID, status, avitoURL, apiKey); err != nil {
-			log.Printf("Failed to update order %d status to %s: %v", orderID, status, err)
+		if err := s.sendStatusUpdate(orderID, step.status, step.message, avitoURL, apiKey); err != nil {
+			log.Printf("Failed to update order %d status to %s: %v", orderID, step.status, err)
 			return
 		}
 
-		log.Printf("Order %d: status updated to '%s'", orderID, status)
+		log.Printf("Order %d: status updated to '%s'", orderID, step.status)
 	}
 }
 
-func (s *Server) sendStatusUpdate(orderID int, status, avitoURL, apiKey string) error {
+func (s *Server) sendStatusUpdate(orderID int, status, message, avitoURL, apiKey string) error {
 	type updateRequest struct {
-		Status string `json:"status"`
+		Status  string `json:"status"`
+		Message string `json:"message"`
 	}
 
-	reqBody := updateRequest{Status: status}
+	reqBody := updateRequest{Status: status, Message: message}
 	jsonData, err := json.Marshal(reqBody)
 	if err != nil {
 		return fmt.Errorf("marshal request: %w", err)

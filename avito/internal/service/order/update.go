@@ -10,7 +10,7 @@ import (
 	"avito/pkg/errorx"
 )
 
-func (s *Order) UpdateStatus(ctx context.Context, orderID int, status string) (*model.Order, error) {
+func (s *Order) UpdateStatus(ctx context.Context, orderID int, status, message string) (*model.Order, error) {
 	apiKey := ctxutil.APIKeyFromContext(ctx)
 	if len(apiKey) == 0 {
 		return nil, errorx.New(errorx.CodeUnauthorized, errors.New("unauthorized"))
@@ -33,7 +33,7 @@ func (s *Order) UpdateStatus(ctx context.Context, orderID int, status string) (*
 	if order.Status == model.StatusCancelled || order.Status == model.StatusDelivered {
 		return nil, errorx.New(errorx.CodeBadRequest, errors.New("order is already cancelled or delivered"))
 	}
-	order, err = s.repo.UpdateStatus(ctx, orderID, status)
+	order, err = s.repo.UpdateStatus(ctx, orderID, status, message)
 	if err != nil {
 		return nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
 	}

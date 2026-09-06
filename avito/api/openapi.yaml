@@ -396,7 +396,7 @@ paths:
         Обновление статуса заказа. Используется рестораном для изменения статуса в процессе приготовления и доставки.
         Ресторан может обновлять только свои заказы. Требуется аутентификация через X-Api-Key.
 
-        Нельзя изменить статус заказа, если он уже в финальном состоянии (cancelled, delivered).
+        Нельзя изменить статус заказа, если он уже в финальном состоянии (rejected, delivered).
       operationId: updateOrderStatus
       security:
         - ApiKeyAuth: []
@@ -471,17 +471,15 @@ components:
         - ready
         - delivering
         - delivered
-        - cancelled
       description: |
         Статус заказа:
         - pending - заказ создан, ожидает подтверждения ресторана
         - confirmed - заказ подтверждён рестораном
-        - rejected - заказ отклонён рестораном (не используется, вместо этого cancelled)
+        - rejected - заказ отклонён рестораном
         - cooking - заказ готовится
         - ready - заказ готов к доставке
         - delivering - заказ доставляется
         - delivered - заказ доставлен
-        - cancelled - заказ отменён
       example: cooking
 
     Restaurant:
@@ -792,6 +790,10 @@ components:
           pattern: '^\d+(\.\d{1,2})?$'
           description: Общая стоимость заказа (decimal)
           example: "1240.00"
+        restaurant_message:
+          type: string
+          description: Сообщение от ресторана о статусе заказа
+          example: "Ваш заказ готовится"
         created_at:
           type: string
           format: date-time
@@ -897,6 +899,10 @@ components:
       properties:
         status:
           $ref: '#/components/schemas/OrderStatus'
+        message:
+          type: string
+          description: Сообщение от ресторана о текущем статусе заказа
+          example: "Ваш заказ готовится"
 
     Error:
       type: object

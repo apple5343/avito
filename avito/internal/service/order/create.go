@@ -81,14 +81,20 @@ func (s *Order) Create(ctx context.Context, req *model.OrderRequest) (*model.Ord
 	if err != nil {
 		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("notify restaurant: %w", err))
 	}
+	if message == "" && !status {
+		message = "Ресторан не принял заказ"
+	} else if message == "" && status {
+		message = "Ресторан принял заказ"
+	}
+
 	if !status {
-		if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusCancelled); err != nil {
+		if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusCancelled, message); err != nil {
 			return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
 		}
 		return nil, nil, errorx.New(errorx.CodeConflict, errors.New(message))
 	}
 
-	if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusConfirmed); err != nil {
+	if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusConfirmed, message); err != nil {
 		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
 	}
 	order.Status = model.StatusConfirmed

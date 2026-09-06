@@ -13,7 +13,8 @@ import (
 func (h *Handler) UpdateStatus() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		var req struct {
-			Status string `json:"status"`
+			Status  string `json:"status"`
+			Message string `json:"message"`
 		}
 		orderID, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
@@ -22,7 +23,7 @@ func (h *Handler) UpdateStatus() echo.HandlerFunc {
 		if err = c.Bind(&req); err != nil {
 			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid json: %w", err))
 		}
-		order, err := h.service.UpdateStatus(c.Request().Context(), orderID, req.Status)
+		order, err := h.service.UpdateStatus(c.Request().Context(), orderID, req.Status, req.Message)
 		if err != nil {
 			return err
 		}

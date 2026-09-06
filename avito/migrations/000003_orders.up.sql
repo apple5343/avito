@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS orders (
     delivery_address TEXT NOT NULL,
     comment TEXT,
     total_price DECIMAL(10, 2) NOT NULL CHECK (total_price >= 0),
+    restaurant_message TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );

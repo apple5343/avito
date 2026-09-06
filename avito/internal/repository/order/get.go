@@ -11,7 +11,7 @@ import (
 
 func (r *Order) GetOrderByID(ctx context.Context, id int) (*model.Order, error) {
 	order := model.Order{}
-	query := `SELECT id, user_id, restaurant_id, status, delivery_address, comment, total_price, created_at, updated_at 
+	query := `SELECT id, user_id, restaurant_id, status, delivery_address, comment, total_price, restaurant_message, created_at, updated_at 
 			FROM orders WHERE id = $1`
 	if err := r.db.GetContext(ctx, &order, query, id); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -35,7 +35,7 @@ func (r *Order) GetItemsByOrderID(ctx context.Context, orderID int) ([]model.Ord
 
 func (r *Order) GetUserOrders(ctx context.Context, userID int) ([]model.Order, error) {
 	var orders []model.Order
-	query := `SELECT id, user_id, restaurant_id, status, delivery_address, comment, total_price, created_at, updated_at 
+	query := `SELECT id, user_id, restaurant_id, status, delivery_address, comment, total_price, restaurant_message, created_at, updated_at 
 			FROM orders WHERE user_id = $1
 			ORDER BY created_at DESC`
 	if err := r.db.SelectContext(ctx, &orders, query, userID); err != nil {

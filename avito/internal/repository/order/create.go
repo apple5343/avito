@@ -24,8 +24,8 @@ func (r *Order) Create(ctx context.Context, order *model.Order, items []model.Or
 		}
 	}()
 
-	orderQuery := `INSERT INTO orders (user_id, restaurant_id, status, delivery_address, comment, total_price)
-			VALUES (:user_id, :restaurant_id, :status, :delivery_address, :comment, :total_price) 
+	orderQuery := `INSERT INTO orders (user_id, restaurant_id, status, delivery_address, comment, total_price, restaurant_message)
+			VALUES (:user_id, :restaurant_id, :status, :delivery_address, :comment, :total_price, :restaurant_message) 
 			RETURNING id, created_at, updated_at`
 
 	rows, err := tx.NamedQuery(orderQuery, order)

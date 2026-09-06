@@ -17,7 +17,7 @@ const (
 	StatusReady      = "ready"
 	StatusDelivering = "delivering"
 	StatusDelivered  = "delivered"
-	StatusCancelled  = "cancelled"
+	StatusCancelled  = "rejected"
 )
 
 var Statuses = map[string]bool{
@@ -32,15 +32,16 @@ var Statuses = map[string]bool{
 }
 
 type Order struct {
-	ID              int             `json:"id" db:"id"`
-	UserID          int             `json:"user_id" db:"user_id"`
-	RestaurantID    int             `json:"restaurant_id" db:"restaurant_id"`
-	Status          string          `json:"status" db:"status"`
-	DeliveryAddress string          `json:"delivery_address" db:"delivery_address"`
-	Comment         string          `json:"comment" db:"comment"`
-	TotalPrice      decimal.Decimal `json:"total_price" db:"total_price"`
-	CreatedAt       time.Time       `json:"created_at" db:"created_at"`
-	UpdatedAt       time.Time       `json:"updated_at" db:"updated_at"`
+	ID                int             `json:"id" db:"id"`
+	UserID            int             `json:"user_id" db:"user_id"`
+	RestaurantID      int             `json:"restaurant_id" db:"restaurant_id"`
+	Status            string          `json:"status" db:"status"`
+	DeliveryAddress   string          `json:"delivery_address" db:"delivery_address"`
+	Comment           string          `json:"comment" db:"comment"`
+	TotalPrice        decimal.Decimal `json:"total_price" db:"total_price"`
+	RestaurantMessage string          `json:"restaurant_message,omitempty" db:"restaurant_message"`
+	CreatedAt         time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time       `json:"updated_at" db:"updated_at"`
 }
 
 func (o *Order) BeforeCreate() error {
