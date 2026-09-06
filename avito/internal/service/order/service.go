@@ -9,6 +9,7 @@ import (
 type orderRepository interface {
 	GetOrderByID(ctx context.Context, id int) (*model.Order, error)
 	GetItemsByOrderID(ctx context.Context, orderID int) ([]model.OrderItem, error)
+	GetOrderHistory(ctx context.Context, orderID int) ([]model.OrderHistory, error)
 	GetUserOrders(ctx context.Context, userID int) ([]model.Order, error)
 	Create(ctx context.Context, order *model.Order, items []model.OrderItem) error
 	UpdateStatus(ctx context.Context, id int, status, message string) (*model.Order, error)

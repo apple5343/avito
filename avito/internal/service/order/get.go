@@ -60,3 +60,23 @@ func (s *Order) GetUserOrders(ctx context.Context) ([]model.Order, error) {
 	}
 	return orders, nil
 }
+
+func (s *Order) GetOrderHistory(ctx context.Context, orderID int) ([]model.OrderHistory, error) {
+	userID := ctxutil.UserIDFromContext(ctx)
+	if userID == 0 {
+		return nil, errorx.New(errorx.CodeUnauthorized, errors.New("unauthorized"))
+	}
+
+	order, err := s.GetOrderByID(ctx, orderID)
+	if err != nil {
+		return nil, err
+	}
+	if order.UserID != userID {
+		return nil, errorx.New(errorx.CodeForbidden, errors.New("forbidden"))
+	}
+	history, err := s.repo.GetOrderHistory(ctx, orderID)
+	if err != nil {
+		return nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("get order history: %w", err))
+	}
+	return history, nil
+}

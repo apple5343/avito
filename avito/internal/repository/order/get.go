@@ -43,3 +43,14 @@ func (r *Order) GetUserOrders(ctx context.Context, userID int) ([]model.Order, e
 	}
 	return orders, nil
 }
+
+func (r *Order) GetOrderHistory(ctx context.Context, orderID int) ([]model.OrderHistory, error) {
+	var history []model.OrderHistory
+	query := `SELECT id, order_id, status, changed_at
+			FROM order_status_history WHERE order_id = $1
+			ORDER BY changed_at DESC`
+	if err := r.db.SelectContext(ctx, &history, query, orderID); err != nil {
+		return nil, err
+	}
+	return history, nil
+}

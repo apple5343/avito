@@ -72,3 +72,10 @@ type OrderItemRequest struct {
 	MenuItemID int `json:"menu_item_id" db:"menu_item_id"`
 	Quantity   int `json:"quantity" db:"quantity"`
 }
+
+type OrderHistory struct {
+	ID        int       `json:"id" db:"id"`
+	OrderID   int       `json:"order_id" db:"order_id"`
+	Status    string    `json:"status" db:"status"`
+	ChangedAt time.Time `json:"changed_at" db:"changed_at"`
+}

@@ -36,3 +36,17 @@ func (h *Handler) GetUserOrders() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, orders)
 	}
 }
+
+func (h *Handler) GetOrderHistory() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		orderID, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid id: %w", err))
+		}
+		orders, err := h.service.GetOrderHistory(c.Request().Context(), orderID)
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, orders)
+	}
+}
