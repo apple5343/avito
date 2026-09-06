@@ -3,7 +3,7 @@ package main
 import (
 	"avito/internal/config"
 	"avito/internal/infrastructure"
-	"avito/internal/pkg/restaurantapi/mock"
+	"avito/internal/pkg/restaurantapi/http"
 	menuRepository "avito/internal/repository/menu"
 	orderRepository "avito/internal/repository/order"
 	restaurantRepository "avito/internal/repository/restaurant"
@@ -35,7 +35,7 @@ func main() {
 
 	restaurantService := restaurantService.NewService(restaurantRepo)
 	menuService := menuService.NewService(menuRepo, restaurantService)
-	orderService := orderService.NewService(orderRepo, menuService, mock.New(), restaurantService)
+	orderService := orderService.NewService(orderRepo, menuService, http.NewClient(), restaurantService)
 
 	server := transport.NewServer(serverConfig, restaurantService, menuService, orderService)
 	err = server.Start()

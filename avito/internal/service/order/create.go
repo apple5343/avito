@@ -73,17 +73,25 @@ func (s *Order) Create(ctx context.Context, req *model.OrderRequest) (*model.Ord
 
 	order.TotalPrice = totalPrice
 
-	status, message, err := s.restaurant.Create(ctx, restaurant.CallbackURL, order, items)
-	if err != nil {
-		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("create order: %w", err))
-	}
-	if !status {
-		return nil, nil, errorx.New(errorx.CodeConflict, errors.New(message))
-	}
-
 	if err = s.repo.Create(ctx, order, items); err != nil {
 		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("create order: %w", err))
 	}
+
+	status, message, err := s.restaurant.Create(ctx, restaurant.CallbackURL, order, items)
+	if err != nil {
+		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("notify restaurant: %w", err))
+	}
+	if !status {
+		if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusCancelled); err != nil {
+			return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
+		}
+		return nil, nil, errorx.New(errorx.CodeConflict, errors.New(message))
+	}
+
+	if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusConfirmed); err != nil {
+		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
+	}
+	order.Status = model.StatusConfirmed
 
 	return order, items, nil
 }

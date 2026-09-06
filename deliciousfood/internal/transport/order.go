@@ -38,7 +38,7 @@ func (s *Server) OrderHandler() echo.HandlerFunc {
 			})
 		}
 
-		if rand.IntN(100) < 20 {
+		if rand.IntN(100) < 50 {
 			return c.JSON(http.StatusConflict, response{
 				Status:  "error",
 				Message: issues[rand.IntN(len(issues))],
@@ -63,7 +63,7 @@ func (s *Server) processOrder(orderID int, avitoURL, apiKey string) {
 	}
 
 	for _, status := range statusFlow {
-		sleepDuration := time.Second * time.Duration(rand.IntN(90)+30)
+		sleepDuration := time.Second * time.Duration(rand.IntN(20)+10)
 		log.Printf("Order %d: waiting %v before status '%s'", orderID, sleepDuration, status)
 		time.Sleep(sleepDuration)
 

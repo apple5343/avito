@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	StatusPending    = "pending"
 	StatusConfirmed  = "confirmed"
 	StatusRejected   = "rejected"
 	StatusCooking    = "cooking"
@@ -20,6 +21,7 @@ const (
 )
 
 var Statuses = map[string]bool{
+	"pending":    true,
 	"confirmed":  true,
 	"rejected":   true,
 	"cooking":    true,
@@ -45,7 +47,7 @@ func (o *Order) BeforeCreate() error {
 	if len(o.DeliveryAddress) == 0 {
 		return errorx.New(errorx.CodeBadRequest, errors.New("delivery address is required"))
 	}
-	o.Status = "confirmed"
+	o.Status = StatusPending
 	return nil
 }
 
