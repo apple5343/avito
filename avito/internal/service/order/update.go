@@ -31,8 +31,8 @@ func (s *Order) UpdateStatus(ctx context.Context, orderID int, status, message s
 		return nil, errorx.New(errorx.CodeForbidden, errors.New("forbidden"))
 	}
 
-	if order.Status == model.StatusCancelled || order.Status == model.StatusDelivered {
-		return nil, errorx.New(errorx.CodeBadRequest, errors.New("order is already cancelled or delivered"))
+	if order.Status == model.StatusRejected || order.Status == model.StatusDelivered {
+		return nil, errorx.New(errorx.CodeBadRequest, errors.New("order is already rejected or delivered"))
 	}
 	order, err = s.repo.UpdateStatus(ctx, orderID, status, message)
 	if err != nil {

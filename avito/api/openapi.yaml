@@ -185,36 +185,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
-    patch:
-      tags:
-        - restaurants
-      summary: Обновить информацию о ресторане
-      description: Обновление информации о ресторане. Требуется аутентификация через X-Api-Key.
-      operationId: updateRestaurant
-      security:
-        - ApiKeyAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RestaurantUpdate'
-      responses:
-        '200':
-          description: Информация о ресторане обновлена
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Restaurant'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalError'
-
   /restaurants/{id}:
     get:
       tags:
@@ -425,7 +395,7 @@ paths:
         2. Расчёт общей стоимости
         3. Создание заказа в БД со статусом 'pending'
         4. Отправка запроса в ресторан для подтверждения
-        5. Обновление статуса на 'confirmed' или 'cancelled' в зависимости от ответа ресторана
+        5. Обновление статуса на `confirmed` или `rejected` в зависимости от ответа ресторана
 
         Требуется аутентификация через X-User-Id.
       operationId: createOrder
@@ -646,13 +616,17 @@ components:
         - delivered
       description: |
         Статус заказа:
-        - pending - заказ создан, ожидает подтверждения ресторана
-        - confirmed - заказ подтверждён рестораном
-        - rejected - заказ отклонён рестораном
-        - cooking - заказ готовится
-        - ready - заказ готов к доставке
-        - delivering - заказ доставляется
-        - delivered - заказ доставлен
+        - `pending` — заказ создан, ожидает подтверждения ресторана (выставляется только автоматически при `POST /orders`)
+        - `confirmed` — заказ подтверждён рестораном
+        - `rejected` — заказ отклонён рестораном
+        - `cooking` — заказ готовится
+        - `ready` — заказ готов к доставке
+        - `delivering` — заказ доставляется
+        - `delivered` — заказ доставлен (финальный статус)
+
+        Через `PATCH /orders/{id}/status` ресторан может выставить любой статус
+        кроме `pending` (этот статус система выставляет сама при создании заказа).
+        Заказ в финальном статусе (`rejected`, `delivered`) изменить нельзя.
       example: cooking
 
     OrderHistoryItem:

@@ -17,18 +17,16 @@ const (
 	StatusReady      = "ready"
 	StatusDelivering = "delivering"
 	StatusDelivered  = "delivered"
-	StatusCancelled  = "rejected"
 )
 
 var Statuses = map[string]bool{
-	"pending":    true,
+	"pending":    false,
 	"confirmed":  true,
 	"rejected":   true,
 	"cooking":    true,
 	"ready":      true,
 	"delivering": true,
 	"delivered":  true,
-	"cancelled":  true,
 }
 
 type Order struct {
@@ -62,7 +60,6 @@ type OrderItem struct {
 
 type OrderRequest struct {
 	RestaurantID    int                `json:"restaurant_id" db:"restaurant_id"`
-	UserID          int                `json:"user_id" db:"user_id"`
 	DeliveryAddress string             `json:"delivery_address" db:"delivery_address"`
 	Comment         string             `json:"comment" db:"comment"`
 	Items           []OrderItemRequest `json:"items" db:"-"`

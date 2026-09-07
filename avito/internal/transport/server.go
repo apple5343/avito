@@ -1,12 +1,13 @@
 package transport
 
 import (
+	"net/http"
+
 	"avito/internal/config"
 	"avito/internal/transport/menu"
 	"avito/internal/transport/middleware"
 	"avito/internal/transport/order"
 	"avito/internal/transport/restaurant"
-	"net/http"
 
 	echoMiddleware "github.com/labstack/echo/v4/middleware"
 
@@ -50,7 +51,7 @@ func (s *Server) route() {
 	{
 		restaurant.GET("", s.restaurantHandler.List())
 		restaurant.POST("", s.restaurantHandler.Create())
-		restaurant.PATCH("", middleware.APIKeyMiddleware()(s.restaurantHandler.Update()))
+		restaurant.PATCH("/:id", middleware.APIKeyMiddleware()(s.restaurantHandler.Update()))
 		restaurant.GET("/:id", s.restaurantHandler.GetByID())
 		restaurant.GET("/:id/menu", s.menuHandler.GetMenu())
 	}

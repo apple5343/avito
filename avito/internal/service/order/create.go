@@ -89,7 +89,7 @@ func (s *Order) Create(ctx context.Context, req *model.OrderRequest) (*model.Ord
 	}
 
 	if !status {
-		if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusCancelled, message); err != nil {
+		if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusRejected, message); err != nil {
 			return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
 		}
 		return nil, nil, errorx.New(errorx.CodeConflict, errors.New(message))

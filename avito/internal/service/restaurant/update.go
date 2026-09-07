@@ -12,10 +12,17 @@ import (
 	"avito/pkg/validator"
 )
 
-func (s *Restaurant) Update(ctx context.Context, updates map[string]any) (*model.Restaurant, error) {
+func (s *Restaurant) Update(ctx context.Context, restaurantID int, updates map[string]any) (*model.Restaurant, error) {
 	apiKey := ctxutil.APIKeyFromContext(ctx)
 	if len(apiKey) == 0 {
 		return nil, errorx.New(errorx.CodeUnauthorized, errors.New("unauthorized"))
+	}
+	restaurant, err := s.GetByID(ctx, restaurantID)
+	if err != nil {
+		return nil, err
+	}
+	if restaurant.APIKey != apiKey {
+		return nil, errorx.New(errorx.CodeForbidden, errors.New("forbidden"))
 	}
 	if len(updates) == 0 {
 		return nil, errorx.New(errorx.CodeBadRequest, errors.New("updates is required"))
@@ -51,7 +58,7 @@ func (s *Restaurant) Update(ctx context.Context, updates map[string]any) (*model
 		}
 	}
 
-	restaurant, err := s.repo.Update(ctx, apiKey, updates)
+	restaurant, err = s.repo.Update(ctx, restaurantID, updates)
 	if err != nil {
 		if errors.Is(err, repoErrors.ErrNotFound) {
 			return nil, errorx.New(errorx.CodeNotFound, errors.New("restaurant not found"))

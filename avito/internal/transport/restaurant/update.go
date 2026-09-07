@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"avito/pkg/errorx"
 
@@ -20,6 +21,10 @@ func (h *Handler) Update() echo.HandlerFunc {
 		"is_active":    true,
 	}
 	return func(c echo.Context) error {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid id: %w", err))
+		}
 		var updates map[string]any
 		if err := json.NewDecoder(c.Request().Body).Decode(&updates); err != nil {
 			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid json: %w", err))
@@ -31,7 +36,7 @@ func (h *Handler) Update() echo.HandlerFunc {
 			}
 		}
 
-		restaurant, err := h.service.Update(c.Request().Context(), updates)
+		restaurant, err := h.service.Update(c.Request().Context(), id, updates)
 
 		if err != nil {
 			return err

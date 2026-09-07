@@ -10,7 +10,7 @@ import (
 	repoErrors "avito/internal/repository/errors"
 )
 
-func (r *Restaurant) Update(ctx context.Context, apiKey string, updates map[string]any) (*model.Restaurant, error) {
+func (r *Restaurant) Update(ctx context.Context, id int, updates map[string]any) (*model.Restaurant, error) {
 	setClauses := make([]string, 0, len(updates)+1)
 	args := make([]any, 0, len(updates)+2)
 
@@ -22,8 +22,8 @@ func (r *Restaurant) Update(ctx context.Context, apiKey string, updates map[stri
 	args = append(args, time.Now())
 	setClauses = append(setClauses, fmt.Sprintf("updated_at = $%d", len(args)))
 
-	args = append(args, apiKey)
-	query := fmt.Sprintf("UPDATE restaurants SET %s WHERE api_key = $%d", strings.Join(setClauses, ", "), len(args))
+	args = append(args, id)
+	query := fmt.Sprintf("UPDATE restaurants SET %s WHERE id = $%d", strings.Join(setClauses, ", "), len(args))
 	res, err := r.db.ExecContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
@@ -35,5 +35,5 @@ func (r *Restaurant) Update(ctx context.Context, apiKey string, updates map[stri
 	if count == 0 {
 		return nil, repoErrors.ErrNotFound
 	}
-	return r.GetByAPIKey(ctx, apiKey)
+	return r.GetByID(ctx, id)
 }

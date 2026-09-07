@@ -1,21 +1,28 @@
 package http
 
 import (
-	"avito/internal/model"
 	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"avito/internal/model"
 )
 
 const retryCount = 3
+const requestTimeout = time.Second * 2
 
 type Client struct {
+	c *http.Client
 }
 
 func NewClient() *Client {
-	return &Client{}
+	return &Client{
+		c: &http.Client{
+			Timeout: requestTimeout,
+		},
+	}
 }
 
 type request struct {
@@ -43,7 +50,7 @@ func (c *Client) Create(ctx context.Context, url string, order *model.Order, ite
 	timeout := time.Second
 	var resp *http.Response
 	for i := 0; i < retryCount; i++ {
-		resp, err = http.DefaultClient.Do(req)
+		resp, err = c.c.Do(req)
 		if err == nil {
 			break
 		}
@@ -62,7 +69,6 @@ func (c *Client) Create(ctx context.Context, url string, order *model.Order, ite
 		}
 		return true, res.Message, nil
 	}
-
 
 	if resp.StatusCode == http.StatusConflict {
 		var res response
