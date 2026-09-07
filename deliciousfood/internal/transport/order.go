@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bytes"
+	"context"
 	"deliciousfood/internal/model"
 	"encoding/json"
 	"fmt"
@@ -38,10 +39,10 @@ func (s *Server) OrderHandler() echo.HandlerFunc {
 			})
 		}
 
-		if rand.IntN(100) < 50 {
+		if rand.IntN(100) < 50 { //nolint
 			return c.JSON(http.StatusConflict, response{
 				Status:  "error",
-				Message: issues[rand.IntN(len(issues))],
+				Message: issues[rand.IntN(len(issues))], //nolint
 			})
 		}
 
@@ -66,7 +67,7 @@ func (s *Server) processOrder(orderID int, avitoURL, apiKey string) {
 	}
 
 	for _, step := range statusFlow {
-		sleepDuration := time.Second * time.Duration(rand.IntN(20)+10)
+		sleepDuration := time.Second * time.Duration(rand.IntN(20)+10) //nolint
 		log.Printf("Order %d: waiting %v before status '%s'", orderID, sleepDuration, step.status)
 		time.Sleep(sleepDuration)
 
@@ -80,6 +81,9 @@ func (s *Server) processOrder(orderID int, avitoURL, apiKey string) {
 }
 
 func (s *Server) sendStatusUpdate(orderID int, status, message, avitoURL, apiKey string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	defer cancel()
 	type updateRequest struct {
 		Status  string `json:"status"`
 		Message string `json:"message"`
@@ -92,7 +96,7 @@ func (s *Server) sendStatusUpdate(orderID int, status, message, avitoURL, apiKey
 	}
 
 	url := fmt.Sprintf("%s/orders/%d/status", avitoURL, orderID)
-	req, err := http.NewRequest(http.MethodPatch, url, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPatch, url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return fmt.Errorf("create request: %w", err)
 	}
@@ -105,7 +109,11 @@ func (s *Server) sendStatusUpdate(orderID int, status, message, avitoURL, apiKey
 	if err != nil {
 		return fmt.Errorf("send request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			log.Printf("close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)

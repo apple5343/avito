@@ -1,0 +1,83 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: none
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - bodyclose
+    - contextcheck
+    - errorlint
+    - errname
+    - noctx
+    - nilerr
+    - nilnil
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - misspell
+    - gocritic
+    - gosec
+    - prealloc
+    - copyloopvar
+    - dupl
+    - goconst
+
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
+
+    govet:
+      enable:
+        - shadow
+
+    dupl:
+      threshold: 100
+
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+
+    gosec:
+      excludes:
+        - G104
+
+    revive:
+      rules:
+        - name: exported
+        - name: package-comments
+          disabled: true
+
+  exclusions:
+    generated: strict
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl
+          - gosec
+          - unparam
+      - path: .*internal/model/menu\.go$
+        linters:
+          - goconst
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+  settings:
+    goimports:
+      local-prefixes:
+        - avito
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

@@ -26,7 +26,7 @@ func (h *Handler) Update() echo.HandlerFunc {
 			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid id: %w", err))
 		}
 		var updates map[string]any
-		if err := json.NewDecoder(c.Request().Body).Decode(&updates); err != nil {
+		if err = json.NewDecoder(c.Request().Body).Decode(&updates); err != nil {
 			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid json: %w", err))
 		}
 

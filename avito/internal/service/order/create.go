@@ -52,7 +52,8 @@ func (s *Order) Create(ctx context.Context, req *model.OrderRequest) (*model.Ord
 	totalPrice := decimal.NewFromInt(0)
 	items := make([]model.OrderItem, 0, len(req.Items))
 	for _, reqItem := range req.Items {
-		item, err := s.menuService.GetItemByID(ctx, reqItem.MenuItemID)
+		var item *model.MenuItem
+		item, err = s.menuService.GetItemByID(ctx, reqItem.MenuItemID)
 		if err != nil {
 			return nil, nil, err
 		}

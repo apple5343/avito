@@ -237,7 +237,7 @@ cooking → ready → delivering → delivered
 
 - `X-User-Id` вместо полноценной auth пользователей.
 - API-ключ ресторана хранится в открытом виде в БД.
-- Нет rate-limit / circuit breaker на callback к ресторану; есть только
+- Нет rate-limit на callback к ресторану; есть только
   3 ретрая с экспоненциальным backoff и таймаутом 2 c.
 - `deliciousfood` рандомно отклоняет 50% заказов — чтобы в демо были видны
   оба сценария CJM.
@@ -245,7 +245,6 @@ cooking → ready → delivering → delivered
 - Нет пагинации в списках.
 - Логи в stdout через `log.Printf`.
 - Нет юнит-/интеграционных тестов.
-- `golangci.yml` настроен только для `avito`.
 
 ## Возможные улучшения: 
 - JWT вместо `X-User-Id`
@@ -261,4 +260,5 @@ cooking → ready → delivering → delivered
 
 ```bash
 cd avito && golangci-lint run ./...
+cd deliciousfood && golangci-lint run ./...
 ```

@@ -35,11 +35,15 @@ func (r *Order) Create(ctx context.Context, order *model.Order, items []model.Or
 
 	if rows.Next() {
 		if err = rows.StructScan(order); err != nil {
-			rows.Close()
+			if err = rows.Close(); err != nil {
+				return fmt.Errorf("close rows: %w", err)
+			}
 			return fmt.Errorf("scan order: %w", err)
 		}
 	}
-	rows.Close()
+	if err = rows.Close(); err != nil {
+		return fmt.Errorf("close rows: %w", err)
+	}
 
 	if order.ID == 0 {
 		return fmt.Errorf("failed to get order id")
@@ -70,7 +74,11 @@ func (r *Order) Create(ctx context.Context, order *model.Order, items []model.Or
 	if err != nil {
 		return fmt.Errorf("insert order items: %w", err)
 	}
-	defer rows.Close()
+	defer func() {
+		if err = rows.Close(); err != nil {
+			log.Printf("close rows: %v", err)
+		}
+	}()
 	idx := 0
 	for rows.Next() {
 		if idx < len(items) {

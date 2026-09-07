@@ -2,6 +2,7 @@ package register
 
 import (
 	"bytes"
+	"context"
 	"deliciousfood/internal/model"
 	"encoding/json"
 	"fmt"
@@ -42,6 +43,7 @@ type RegisterResponse struct {
 func EnsureRegistered(avitoURL string, restaurant Restaurant) (string, error) {
 	if apiKey, err := loadAPIKey(); err == nil && apiKey != "" {
 		log.Printf("Api key found")
+		log.Printf("API key: %s", apiKey)
 		return apiKey, nil
 	}
 
@@ -67,6 +69,8 @@ func EnsureRegistered(avitoURL string, restaurant Restaurant) (string, error) {
 }
 
 func registerRestaurant(avitoURL string, restaurant Restaurant) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	url := avitoURL + "/restaurants"
 
 	jsonData, err := json.Marshal(restaurant)
@@ -74,7 +78,7 @@ func registerRestaurant(avitoURL string, restaurant Restaurant) (string, error) 
 		return "", fmt.Errorf("marshal request: %w", err)
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("create request: %w", err)
 	}
@@ -93,7 +97,11 @@ func registerRestaurant(avitoURL string, restaurant Restaurant) (string, error) 
 	if err != nil {
 		return "", fmt.Errorf("send request: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			log.Printf("close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusCreated {
 		return "", fmt.Errorf("unexpected status code: %d", resp.StatusCode)
@@ -121,6 +129,8 @@ func saveAPIKey(apiKey string) error {
 }
 
 func addMenuItems(avitoURL string, apiKey string, menuItems []model.MenuItem) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
 	for _, menuItem := range menuItems {
 		url := avitoURL + "/menu"
 		jsonData, err := json.Marshal(menuItem)
@@ -128,7 +138,7 @@ func addMenuItems(avitoURL string, apiKey string, menuItems []model.MenuItem) er
 			return fmt.Errorf("marshal request: %w", err)
 		}
 
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(jsonData))
 		if err != nil {
 			return fmt.Errorf("create request: %w", err)
 		}
@@ -140,8 +150,11 @@ func addMenuItems(avitoURL string, apiKey string, menuItems []model.MenuItem) er
 		if err != nil {
 			return fmt.Errorf("send request: %w", err)
 		}
-		defer resp.Body.Close()
-
+		defer func() {
+			if err = resp.Body.Close(); err != nil {
+				log.Printf("close response body: %v", err)
+			}
+		}()
 		if resp.StatusCode != http.StatusCreated {
 			return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 		}

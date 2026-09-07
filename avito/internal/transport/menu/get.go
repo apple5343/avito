@@ -35,7 +35,8 @@ func (h *Handler) GetMenu() echo.HandlerFunc {
 		if category := c.QueryParam("category"); category != "" {
 			filter.Category = &category
 		}
-		if isAvailable, err := strconv.ParseBool(c.QueryParam("is_available")); err == nil {
+		var isAvailable bool
+		if isAvailable, err = strconv.ParseBool(c.QueryParam("is_available")); err == nil {
 			filter.IsAvailable = &isAvailable
 		} else if c.QueryParam("is_available") != "" {
 			return errorx.New(errorx.CodeBadRequest, fmt.Errorf("invalid is_available: %w", err))

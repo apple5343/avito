@@ -2,6 +2,7 @@ package menu
 
 import (
 	"context"
+	"log"
 
 	"avito/internal/model"
 )
@@ -19,7 +20,11 @@ func (r *Menu) Create(ctx context.Context, menuItem *model.MenuItem) error {
 	if rows.Err() != nil {
 		return rows.Err()
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("close rows: %v", err)
+		}
+	}()
 
 	if rows.Next() {
 		return rows.StructScan(menuItem)

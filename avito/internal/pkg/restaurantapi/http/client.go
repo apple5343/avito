@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -60,7 +61,11 @@ func (c *Client) Create(ctx context.Context, url string, order *model.Order, ite
 	if err != nil {
 		return false, "", err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err = resp.Body.Close(); err != nil {
+			log.Printf("close response body: %v", err)
+		}
+	}()
 
 	if resp.StatusCode == http.StatusCreated {
 		var res response

@@ -2,6 +2,7 @@ package restaurant
 
 import (
 	"context"
+	"log"
 
 	"avito/internal/model"
 )
@@ -19,8 +20,11 @@ func (r *Restaurant) Create(ctx context.Context, restaurant *model.Restaurant) e
 	if rows.Err() != nil {
 		return rows.Err()
 	}
-	defer rows.Close()
-
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("close rows: %v", err)
+		}
+	}()
 	if rows.Next() {
 		return rows.StructScan(restaurant)
 	}

@@ -33,7 +33,11 @@ func main() {
 		log.Println(err)
 		return
 	}
-	defer db.Close()
+	defer func() {
+		if err = db.Close(); err != nil {
+			log.Printf("close db: %v", err)
+		}
+	}()
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
