@@ -1,0 +1,65 @@
+@startuml
+title CJM пользователя — заказ еды в Avito.Кухня
+
+skinparam conditionStyle diamond
+skinparam partition {
+    BackgroundColor transparent
+    BorderColor transparent
+}
+
+|Пользователь|
+start
+:Открывает Avito.Кухня;
+:Указывает фильтры\n(город, кухня) —\nопционально;
+
+|API|
+:GET /restaurants?city=&cuisine=;
+:Возвращает список\nRestaurantPublic[];
+
+|Пользователь|
+:Просматривает список\nресторанов;
+:Выбирает ресторан;
+
+|API|
+:GET /restaurants/{id}/menu;
+:Возвращает меню\n(MenuItem[]);
+
+|Пользователь|
+:Просматривает меню,\nописания, цены;
+:Создает заказ:\nсостав\nадрес доставки\nкомментарии;
+
+|API|
+:POST /orders (X-User-Id);
+:Создаёт заказ (status=pending);
+
+|#LightSalmon|Ресторан (внешний сервис)|
+:POST\n {callback_url};
+:Получает запрос на\nподтверждение заказа;
+
+if (Ресторан принимает заказ?) then (да)
+  |API|
+  :status → confirmed;
+  
+  |Пользователь|
+  :Видит подтверждение\nзаказа;
+  
+else (нет)
+  |API|
+  :status → rejected;
+  
+  |Пользователь|
+  :Видит ошибку 409\nс причиной отказа;
+  stop
+endif
+
+:Отслеживает статус\nGET /orders/{id};
+
+|#LightSalmon|Ресторан (внешний сервис)|
+:Готовит и доставляет заказ;
+|API|
+:PATCH /orders/{id}/status\n(cooking → ready →\ndelivering → delivered);
+
+|Пользователь|
+:Получает заказ;
+stop
+@enduml
