@@ -19,6 +19,11 @@ MVP backend-сервиса доставки еды: рестораны реги�
   - [Быстрый старт](#быстрый-старт)
   - [Архитектура (C4 L2)](#архитектура-c4-l2)
   - [API](#api)
+  - [Контракт ресторана (callback)](#контракт-ресторана-callback)
+    - [Запрос от Avito → ресторан](#запрос-от-avito--ресторан)
+    - [Ответ ресторана → Avito](#ответ-ресторана--avito)
+    - [Требования к реализации эндпоинта](#требования-к-реализации-эндпоинта)
+    - [Что делать с заказами после подтверждения](#что-делать-с-заказами-после-подтверждения)
   - [Схема БД](#схема-бд)
   - [Жизненный цикл заказа](#жизненный-цикл-заказа)
     - [Создание](#создание)
@@ -55,24 +60,29 @@ make up        # postgres + миграции + avito + deliciousfood
 make logs      # логи всех контейнеров
 make down      # остановить (с сохранением данных)
 make clean     # остановить и удалить volumes
+
+# Или
+docker compose --env-file config/.env.dev -f docker-compose.dev.yml up -d
 ```
 
-После `make up`:
-
+После старта:
 - **Avito.Кухня** — `http://localhost:8080`
 - **deliciousfood** — `http://localhost:8081`
 - **Postgres** — `localhost:5432` (`postgres/postgres`, db `avito`)
 
-Подробный пример end-to-end сценария через `curl` — в
-[`avito/api/openapi.yaml`](./avito/api/openapi.yaml) (вступительная часть
-`description`).
+Получить `api-key` deliciousfood можно через логи контейнера
+```bash
+make logs
+# Или
+docker compose --env-file config/.env.dev -f docker-compose.dev.yml logs deliciousfood
+```
+Для тестирования рекомендую использовать [swagger editor](https://forge.etsi.org/swagger/editor/). OpenAPI: [`avito/api/openapi.yaml`](./avito/api/openapi.yaml).
 
 ## Архитектура (C4 L2)
 
 ![C4 L2 — контейнеры](./docs/c4-l2.png)
 
 Исходник: [`docs/architecture.puml`](./docs/architecture.puml).
-Рендер: `plantuml docs/architecture.puml -t png -o docs`.
 
 **Слои внутри `avito`:** `transport` (Echo) → `service` (бизнес-логика) →
 `repository` (sqlx) → Postgres. Внутри также `pkg/restaurantapi` — HTTP-клиент
@@ -100,6 +110,80 @@ make clean     # остановить и удалить volumes
 
 Все ошибки возвращаются в формате `{ "status": "error", "message": "..." }`,
 коды: `400 / 401 / 403 / 404 / 409 / 500`.
+
+## Контракт ресторана (callback)
+
+Когда пользователь оформляет заказ, Avito.Кухня **синхронно** вызывает
+`callback_url`, который ресторан указал при регистрации. Ресторан **сам
+реализует** этот эндпоинт и решает, принять заказ или отклонить.
+### Запрос от Avito → ресторан
+
+`POST {callback_url}` (например, `http://deliciousfood:8081/orders`), `Content-Type: application/json`:
+
+```json
+{
+  "order": {
+    "id": 1,
+    "user_id": 42,
+    "restaurant_id": 1,
+    "status": "pending",
+    "delivery_address": "г. Казань, ул. Баумана, 20",
+    "comment": "Позвоните за 10 минут",
+    "total_price": "1240.00",
+    "created_at": "2026-09-07T10:00:00Z",
+    "updated_at": "2026-09-07T10:00:00Z"
+  },
+  "items": [
+    {
+      "id": 1,
+      "order_id": 1,
+      "menu_item_id": 3,
+      "quantity": 2,
+      "price": "590.00"
+    }
+  ]
+}
+```
+
+### Ответ ресторана → Avito
+
+| Код | Когда возвращать | Что делает Avito |
+| --- | --- | --- |
+| **201 Created** + `{"status":"success","message":"…"}` | Заказ принят | Ставит заказу статус `confirmed`, пишет `message` в `orders.restaurant_message` |
+| **409 Conflict** + `{"status":"error","message":"причина"}` | Заказ отклонён | Ставит заказу статус `rejected`, текст причины возвращается пользователю в `409` |
+| любой другой код / таймаут | Техническая проблема | Avito интерпретирует как отказ (см. ниже) |
+
+### Требования к реализации эндпоинта
+
+1. **Идемпотентность.** Avito делает до 3 ретраев с экспоненциальным backoff
+   (1 c → 2 c → 4 c) и общим таймаутом 2 c на попытку. Ресторан должен
+   корректно отвечать одинаково на повторные вызовы с тем же `order.id`.
+2. **Быстрый ответ.** `deliciousfood` отвечает сразу `201`/`409`, а
+   дальнейшую обработку (смену статусов) делает **сам** через
+   `PATCH /orders/{id}/status`. Не блокируйте HTTP-вызов Avito тяжёлой
+   логикой.
+3. **Точка интеграции — `callback_url` целиком.** Это может быть `http://…/orders`
+   или `https://…/webhooks/avito` — что угодно, лишь бы POST с JSON работал
+   и помещался в 2 c.
+4. **Безопасность.** В MVP callback не аутентифицируется (Avito не передаёт
+   подпись). В проде стоит добавить HMAC-подпись в заголовке и проверку на
+   стороне ресторана.
+5. **Сетевая досягаемость.** `callback_url` должен быть доступен из
+   Docker-сети `avito-network`. В `docker-compose.dev.yml` ресторан
+   присутствует в той же сети и обращается к Avito по имени сервиса `avito`,
+   а Avito вызывает его по `http://deliciousfood:8081/orders`.
+
+### Что делать с заказами после подтверждения
+
+После `201` ресторан сам отвечает за жизненный цикл заказа и пушит статусы
+через `PATCH /orders/{id}/status` с заголовком `X-Api-Key`:
+
+```
+cooking → ready → delivering → delivered
+```
+
+В любой момент можно отклонить, передав `rejected` (Avito не даст изменить
+заказ в финальных статусах `rejected` / `delivered`).
 
 ## Схема БД
 

@@ -39,6 +39,7 @@ func (s *Server) Start() error {
 
 func (s *Server) route() {
 	s.e.Use(echoMiddleware.Recover())
+	s.e.Use(echoMiddleware.CORS()) // Для swagger
 	s.e.Use(middleware.ErrorMiddleware())
 	s.e.GET("/health", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{
