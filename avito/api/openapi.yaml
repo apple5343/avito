@@ -215,6 +215,66 @@ paths:
         '500':
           $ref: '#/components/responses/InternalError'
 
+    patch:
+      tags:
+        - restaurants
+      summary: Обновить информацию о ресторане
+      description: |
+        Обновление информации о ресторане. Ресторан может обновлять только свою
+        карточку — соответствие владельца проверяется по `X-Api-Key` и `id` в path.
+        Требуется аутентификация через `X-Api-Key`.
+
+        Поддерживается частичное обновление (partial update): в теле запроса можно
+        передать только те поля, которые нужно изменить.
+      operationId: updateRestaurant
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID ресторана
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RestaurantUpdate'
+            examples:
+              rename:
+                summary: Переименовать ресторан
+                value:
+                  name: "Delicious Food & Co."
+              deactivate:
+                summary: Деактивировать ресторан
+                value:
+                  is_active: false
+              changeCallback:
+                summary: Сменить callback URL
+                value:
+                  callback_url: "http://deliciousfood:8081/orders"
+      responses:
+        '200':
+          description: Информация о ресторане обновлена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Restaurant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /restaurants/{id}/menu:
     get:
       tags:
