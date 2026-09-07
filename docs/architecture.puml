@@ -1,0 +1,39 @@
+@startuml c4-l2
+
+title Avito.Кухня — C4 Level 2 (Container diagram)
+
+top to bottom direction
+
+
+actor "Клиент\n(web-браузер)" as User
+actor "Оператор ресторана\n(внешний сервис)" as RestaurantOperator
+
+package "Avito.Кухня" {
+    rectangle "**avito**\n[Go 1.25 · Echo]\nHTTP API\nпорт 8080" as Avito
+    database "**avito-postgres**\n[PostgreSQL 14]\nпорт 5432" as Postgres
+    rectangle "**avito-migrate**\n[golang-migrate]\nодноразовый запуск" as Migrator
+    rectangle "**deliciousfood**\n[Go 1.25 · Echo]\nCallback-эндпоинт\nпорт 8081" as Restaurant
+}
+
+storage "**api-keys**\nDocker volume\n.api_key файл" as APIKeys
+
+User --> Avito : "GET /restaurants\nGET /menu\nPOST /orders\nGET /orders/{id}\nGET /orders/{id}/history\n\nX-User-Id"
+
+RestaurantOperator --> Avito : "POST /restaurants\nPOST/PATCH /menu\nPATCH /orders/{id}/status\n\nX-Api-Key"
+
+Avito --> Postgres : "sqlx + pgx\n(TCP 5432)\nCRUD заказов/меню/ресторанов"
+
+Avito --> Restaurant : "POST {callback_url}\n\"прими заказ?"\n201/409\n+ 3 ретрая с backoff\n(таймаут 2 c)"
+
+Restaurant --> Avito : "PATCH /orders/{id}/status\ncooking → ready →\ndelivering → delivered\n\nX-Api-Key"
+
+Migrator --> Postgres : "SQL-миграции\n(up/down)"
+
+Restaurant ..> APIKeys : "read/write\n.api_key"
+
+skinparam rectangle {
+    BackgroundColor<<external>> #F5F5F5
+    BorderColor<<external>> #999999
+}
+
+@enduml
