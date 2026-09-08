@@ -26,6 +26,7 @@ func main() {
 			City:        cfg.City,
 			Cuisine:     cfg.Cuisine,
 			CallbackURL: callbackURL,
+			IsActive:    true,
 		})
 		if err != nil {
 			log.Fatalf("Failed to register restaurant: %v", err)

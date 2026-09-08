@@ -36,7 +36,7 @@ func (r *Restaurant) GetByID(ctx context.Context, id int) (*model.Restaurant, er
 }
 
 func (r *Restaurant) List(ctx context.Context, filter *model.RestaurantFilter) ([]model.Restaurant, error) {
-	query := `SELECT id, name, description, city, cuisine, created_at, updated_at 
+	query := `SELECT id, name, description, city, cuisine, is_active, created_at, updated_at 
 			FROM restaurants`
 
 	args := []any{}

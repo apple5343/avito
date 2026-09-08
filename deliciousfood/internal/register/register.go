@@ -25,6 +25,7 @@ type Restaurant struct {
 	City        string `json:"city"`
 	Cuisine     string `json:"cuisine"`
 	CallbackURL string `json:"callback_url"`
+	IsActive    bool   `json:"is_active"`
 }
 
 type RegisterResponse struct {

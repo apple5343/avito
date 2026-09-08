@@ -9,8 +9,8 @@ import (
 
 func (r *Restaurant) Create(ctx context.Context, restaurant *model.Restaurant) error {
 	query := `INSERT INTO restaurants
-		(name, description, city, cuisine, callback_url, api_key)
-		VALUES (:name, :description, :city, :cuisine, :callback_url, :api_key) RETURNING id, created_at, updated_at
+		(name, description, city, cuisine, is_active, callback_url, api_key)
+		VALUES (:name, :description, :city, :cuisine, :is_active, :callback_url, :api_key) RETURNING id, created_at, updated_at
 		`
 
 	rows, err := r.db.NamedQueryContext(ctx, query, restaurant)
