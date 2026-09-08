@@ -44,11 +44,11 @@ func (s *Restaurant) Update(ctx context.Context, restaurantID int, updates map[s
 		}
 	}
 	if cuisine, ok := updates["cuisine"]; ok {
-		cusineStr, okk := cuisine.(string)
-		if okk && len(cusineStr) == 0 {
+		cuisineStr, okk := cuisine.(string)
+		if okk && len(cuisineStr) == 0 {
 			return nil, errorx.New(errorx.CodeBadRequest, errors.New("cuisine is required"))
 		}
-		if !model.Cuisines[cusineStr] {
+		if !model.Cuisines[cuisineStr] {
 			return nil, errorx.New(errorx.CodeBadRequest, errors.New("invalid cuisine type"))
 		}
 	}

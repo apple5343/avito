@@ -81,7 +81,10 @@ func (s *Order) Create(ctx context.Context, req *model.OrderRequest) (*model.Ord
 
 	status, message, err := s.restaurant.Create(ctx, restaurant.CallbackURL, order, items)
 	if err != nil {
-		return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("notify restaurant: %w", err))
+		if _, err = s.repo.UpdateStatus(ctx, order.ID, model.StatusRejected, "Ресторан недоступен"); err != nil {
+			return nil, nil, errorx.New(errorx.CodeInternalServerError, fmt.Errorf("update order status: %w", err))
+		}
+		return nil, nil, errorx.New(errorx.CodeConflict, fmt.Errorf("restaurant is unavailable"))
 	}
 	if message == "" && !status {
 		message = "Ресторан не принял заказ"
